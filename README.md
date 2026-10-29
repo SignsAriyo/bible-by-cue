@@ -71,6 +71,12 @@ See `docs/TEST_REPORT.md` for the latest results and measured sizes.
 The release build is currently signed with the debug key (see `android/app/build.gradle.kts`); configure a real
 upload key before publishing.
 
+## Licence
+
+The source code is released under the [MIT License](LICENSE). The bundled data keeps its own terms: the World
+English Bible is public domain ("World English Bible" is a trademark of eBible.org, so a modified text must not use
+that name), and the cross references come from OpenBible.info under CC BY, which requires credit.
+
 ## Privacy
 
 No account, analytics, ads or network access. Android cloud backup is disabled for the app so notes never leave the
