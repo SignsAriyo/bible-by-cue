@@ -11,7 +11,7 @@ import 'plans_page.dart';
 import 'reader_page.dart';
 import 'theme.dart';
 
-const appVersion = '1.0.0';
+const appVersion = '1.0.1';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -158,7 +158,8 @@ class _ReminderTile extends StatelessWidget {
       }
     }
 
-    return SwitchListTile(
+    // Listens itself: as a const child it is not rebuilt when the settings page rebuilds.
+    return ListenableBuilder(listenable: s, builder: (context, _) => SwitchListTile(
       secondary: const Icon(Icons.notifications_none),
       title: const Text('Daily reading reminder'),
       subtitle: s.reminderOn
@@ -179,7 +180,7 @@ class _ReminderTile extends StatelessWidget {
           : const Text('A gentle local notification. Off by default.'),
       value: s.reminderOn,
       onChanged: (v) => apply(v, s.reminderMinutes),
-    );
+    ));
   }
 }
 
@@ -465,7 +466,7 @@ class _BackupPageState extends State<BackupPage> {
               Text(file.name, style: const TextStyle(fontWeight: FontWeight.w600)),
               if (s.exportedAt != null) Text('Made ${shortDate(s.exportedAt!)} at ${timeOfDay(s.exportedAt!.hour * 60 + s.exportedAt!.minute)}'),
               const SizedBox(height: 6),
-              Text('${s.notes} notes · ${s.bookmarks} bookmarks · ${s.highlights} highlights · ${s.folders} folders'),
+              Text([plural(s.notes, 'note'), plural(s.bookmarks, 'bookmark'), plural(s.highlights, 'highlight'), plural(s.folders, 'folder')].join(' · ')),
               const SizedBox(height: 12),
               RadioGroup<bool>(
                 groupValue: replace,

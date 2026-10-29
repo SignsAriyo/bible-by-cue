@@ -11,11 +11,16 @@ import android.content.Intent
 import android.os.Build
 import java.util.Calendar
 
-/** A simple, battery-friendly daily reminder using an inexact repeating alarm. */
+/**
+ * A battery-friendly daily reminder. Each alarm may fire within a 15-minute window and
+ * schedules the next day's when it fires; an inexact repeating alarm could arrive up to
+ * 18 hours late. Windowed alarms do not need the exact-alarm permission.
+ */
 object Reminder {
     private const val PREFS = "reminder"
     private const val CHANNEL = "daily_reading"
     const val ACTION = "com.cue.bible_by_cue.REMIND"
+    private const val WINDOW_MS = 15 * 60 * 1000L
 
     fun configure(context: Context, enabled: Boolean, hour: Int, minute: Int) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
@@ -39,7 +44,7 @@ object Reminder {
             set(Calendar.MILLISECOND, 0)
             if (timeInMillis <= System.currentTimeMillis()) add(Calendar.DAY_OF_YEAR, 1)
         }
-        alarms.setInexactRepeating(AlarmManager.RTC_WAKEUP, next.timeInMillis, AlarmManager.INTERVAL_DAY, pi)
+        alarms.setWindow(AlarmManager.RTC_WAKEUP, next.timeInMillis, WINDOW_MS, pi)
     }
 
     fun show(context: Context) {
@@ -72,7 +77,10 @@ object Reminder {
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
-            Reminder.ACTION -> Reminder.show(context)
+            Reminder.ACTION -> {
+                Reminder.show(context)
+                Reminder.schedule(context) // tomorrow's reminder
+            }
             else -> Reminder.schedule(context) // boot completed or app updated
         }
     }

@@ -1,6 +1,6 @@
 # Bible by Cue — test report
 
-Date: 29 October 2026 · App version 1.0.0 · Flutter 3.41.5
+Date: 29 October 2026 · App version 1.0.1 (build 2) · Flutter 3.41.5
 
 ## Environment
 
@@ -39,6 +39,25 @@ position of its characters in the note editor.
 | I Storage and performance | See measurements | Measured (see caveats) |
 | J Data recovery | Export, change a note, add a note, then merge-restore: nothing is deleted, the changed note is kept and the backup version is added as a copy. Replace-restore matches the backup and writes a safety copy first. Non-backup files are rejected | Pass |
 
+## System screens (verified on the emulator with the signed 1.0.1 release build)
+
+These were driven through Android's own screens using UI automation over the accessibility tree.
+
+| Flow | What happened | Result |
+| --- | --- | --- |
+| Back up | The system "save" picker opens in Downloads with a dated name; the saved `.json` parses and contains the note | Pass |
+| Never overwrite silently | Choosing an existing backup's name makes Android ask "Overwrite …?"; cancelling leaves the file untouched (same size and time) | Pass |
+| Restore | A note was deleted permanently (trash, then empty trash). Restoring via the system "open" picker showed the file's date and contents and Merge/Replace options; Merge brought the note back | Pass |
+| Export note | "Export as Markdown" saved `Backup-test-sermon.md` with headings and bold intact | Pass |
+| Share text | Android's share sheet opens with the note as plain text | Pass |
+| Share verse image | The share sheet shows a thumbnail of the rendered verse card (proves the FileProvider grant works) | Pass |
+| Install a translation | The public-domain KJV (`eng-kjv2006_vpl.txt`, 31,102 verses) was picked from Downloads; Install stays disabled until the rights box is ticked; installed in about 24 s offline; the reader then shows KJV text | Pass |
+| Upgrade in place | Installing 1.0.1 over itself kept notes, the imported KJV and settings | Pass |
+| Reminder permission | Switching the reminder on asks for notification permission. "Don't allow" leaves it off with no alarm; "Allow" turns it on | Pass |
+| Reminder scheduling | Alarm registered for the chosen time with a 15-minute delivery window; changing the time to 7 PM moved it; turning it off removed it | Pass |
+| Reminder notification | Firing the receiver posts the notification on the "Daily reading" channel and schedules the next day | Pass |
+| Reminder after reboot | After a real reboot, the alarm was re-registered by the app's boot receiver (about 110 s after boot on this slow emulator) | Pass |
+
 Also verified by accident: when the first launch was killed partway through building the search index, the next
 launch discarded the temporary file and rebuilt it cleanly.
 
@@ -46,9 +65,9 @@ launch discarded the temporary file and rebuilt it cleanly.
 
 | Item | Value |
 | --- | --- |
-| Release APK, arm64-v8a (most phones) | **19,681,780 bytes (18.8 MiB)** |
-| Release APK, armeabi-v7a | 17,033,644 bytes |
-| Release APK, x86_64 | 21,125,214 bytes |
+| Release APK 1.0.1, arm64-v8a (most phones) | **19,682,060 bytes (18.8 MiB)** |
+| Release APK 1.0.1, armeabi-v7a | 17,033,928 bytes |
+| Release APK 1.0.1, x86_64 | 21,125,498 bytes |
 | App bundle (all ABIs; Play delivers one ABI per device) | 43,588,291 bytes |
 | What makes up the arm64 APK | Flutter engine 11.3 MB (stored uncompressed so it is memory-mapped, not extracted); app code 5.4 MB; Bible database asset 2.4 MB; everything else under 1 MB |
 | On-device Bible database (verses, search index, cross references) | 13,684,736 bytes |
@@ -70,6 +89,12 @@ launch discarded the temporary file and rebuilt it cleanly.
 6. The navigation rail overflowed on landscape phones; it switches to a compact, icon-only form on short screens.
 7. The reader title said "Psalms 23" while the rest of the app said "Psalm 23".
 8. The note editor re-analysed the whole note on every keystroke; analysis is now cached per line.
+9. The reminder switch stayed "off" after permission was granted, although the reminder was set: the tile was a
+   `const` widget that never rebuilt. The Home sections had the same flaw (verse of the day, continue reading, plan
+   progress and recent items could go stale until you left the screen); they now listen for changes.
+10. The reminder used an inexact daily repeating alarm, which Android may deliver up to 18 hours late. It now uses a
+    15-minute window and schedules the next day each time it fires.
+11. Counts read "1 notes", "1 changed notes"; wording is now singular or plural as appropriate.
 
 ## Not verified, or known limitations
 
@@ -77,9 +102,10 @@ launch discarded the temporary file and rebuilt it cleanly.
   profile builds. The test harness also keeps the accessibility tree on, which adds work per frame. How fast this
   feels on a real mid-range phone has **not** been measured; it is the first thing to check on hardware.
 - **No real phone was tested.** Everything above ran on an x86_64 emulator.
-- **Driven by logic tests, not through the system UI:** the system file picker (backup export/restore, note export,
-  translation import), the share sheet, the verse-image share, and the daily reminder notification actually firing.
-  The Kotlin code for these compiles and the Dart logic is tested, but these screens were not exercised on the device.
+- The reminder notification was triggered by sending its broadcast directly; it was not left to fire at the scheduled
+  time (Android delivers it within the 15-minute window).
+- Installing a large translation takes about 24 s on the emulator; it uses the general import path, not the faster
+  bundled-database path used for the WEB.
 - No database encryption beyond Android's app sandbox and device encryption. The app says so in Privacy.
 - No Bible dictionary or glossary: there is no bundled, clearly licensed source.
-- The release build is signed with the debug key; a real upload key is needed before publishing.
+- Release 1.0.0 on GitHub is signed with the debug key; 1.0.1 and later are signed with the project's upload key (certificate `CN=Cue, O=Cue`, SHA-256 `c4197bc9…fe23f`).

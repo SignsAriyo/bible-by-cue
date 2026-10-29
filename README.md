@@ -68,8 +68,19 @@ flutter build appbundle --release --obfuscate --split-debug-info=build/symbols
 Keep `build/symbols` for each release; it is needed to read crash stack traces from obfuscated builds.
 See `docs/TEST_REPORT.md` for the latest results and measured sizes.
 
-The release build is currently signed with the debug key (see `android/app/build.gradle.kts`); configure a real
-upload key before publishing.
+### Release signing
+
+Release builds are signed with the upload key named in `android/key.properties` (git-ignored, never commit it):
+
+```
+storePassword=…
+keyPassword=…
+keyAlias=upload
+storeFile=C:/path/to/upload-keystore.jks
+```
+
+Without that file, release builds fall back to the debug key so anyone can build the project. Keep the keystore and
+its password backed up somewhere safe: every future update must be signed with the same key.
 
 ## Licence
 

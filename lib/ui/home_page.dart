@@ -14,6 +14,10 @@ import 'search_page.dart';
 import 'share_card.dart';
 import 'theme.dart';
 
+/// Everything shown on Home depends on these; each section listens itself because const
+/// children are not rebuilt when a parent rebuilds.
+final Listenable _homeChanges = Listenable.merge([services.store, services.bibleChanged, services.settings]);
+
 class HomePage extends StatelessWidget {
   final ValueChanged<int> onNavigate;
   const HomePage({super.key, required this.onNavigate});
@@ -31,9 +35,8 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: ListenableBuilder(
-          listenable: Listenable.merge([services.store, services.bibleChanged]),
-          builder: (context, _) => ListView(
+        child: Builder(
+          builder: (context) => ListView(
             padding: const EdgeInsets.fromLTRB(0, 8, 0, 32),
             children: [
               ReadableWidth(
@@ -79,7 +82,10 @@ class _VerseOfTheDay extends StatelessWidget {
   const _VerseOfTheDay();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      ListenableBuilder(listenable: _homeChanges, builder: (context, _) => _build(context));
+
+  Widget _build(BuildContext context) {
     final ref = verseOfTheDay(DateTime.now(), services.bible);
     return FutureBuilder<List<Verse>>(
       future: services.bible.passage(ref),
@@ -144,7 +150,10 @@ class _ContinueAndPlans extends StatelessWidget {
   const _ContinueAndPlans();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      ListenableBuilder(listenable: _homeChanges, builder: (context, _) => _build(context));
+
+  Widget _build(BuildContext context) {
     final last = services.settings.lastPosition;
     final plans = services.settings.activePlans.map(ReadingPlan.byId).whereType<ReadingPlan>().toList();
     return Column(children: [
@@ -247,7 +256,10 @@ class _RecentNotes extends StatelessWidget {
   const _RecentNotes();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      ListenableBuilder(listenable: _homeChanges, builder: (context, _) => _build(context));
+
+  Widget _build(BuildContext context) {
     return FutureBuilder<List<Note>>(
       future: services.store.notes(limit: 3),
       builder: (context, snap) {
@@ -269,7 +281,10 @@ class _RecentPassages extends StatelessWidget {
   const _RecentPassages();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      ListenableBuilder(listenable: _homeChanges, builder: (context, _) => _build(context));
+
+  Widget _build(BuildContext context) {
     return FutureBuilder(
       future: services.store.history(limit: 6),
       builder: (context, snap) {

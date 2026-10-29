@@ -16,6 +16,9 @@ String newUid() {
 
 int nowMs() => DateTime.now().millisecondsSinceEpoch;
 
+/// "1 note", "2 notes".
+String plural(int n, String noun) => '$n $noun${n == 1 ? '' : 's'}';
+
 enum NoteKind {
   sermon('Sermon'),
   study('Bible study'),
@@ -135,12 +138,12 @@ class RestoreReport {
   @override
   String toString() {
     final parts = <String>[
-      '$notesAdded notes added',
-      if (notesCopied > 0) '$notesCopied changed notes kept side by side as copies',
+      '${plural(notesAdded, 'note')} added',
+      if (notesCopied > 0) '${plural(notesCopied, 'changed note')} kept side by side as copies',
       if (notesSkipped > 0) '$notesSkipped already up to date',
-      '$bookmarksAdded bookmarks added',
-      '$highlightsAdded highlights added',
-      if (highlightsKept > 0) '$highlightsKept highlights kept as they were on this device',
+      '${plural(bookmarksAdded, 'bookmark')} added',
+      '${plural(highlightsAdded, 'highlight')} added',
+      if (highlightsKept > 0) '${plural(highlightsKept, 'highlight')} kept as they were on this device',
       if (settingsRestored) 'settings restored',
     ];
     return parts.join(' · ');
