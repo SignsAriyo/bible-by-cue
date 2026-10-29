@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Open book with a small cross, drawn in the 108dp adaptive icon grid (safe zone 66dp). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#F6F1E7"
+        android:pathData="M54,46 Q44.5,40.5 33,43.5 L33,72 Q44.5,69.5 54,75 Z" />
+    <path android:fillColor="#E8E0CF"
+        android:pathData="M54,46 Q63.5,40.5 75,43.5 L75,72 Q63.5,69.5 54,75 Z" />
+    <path android:fillColor="#E5D7A8" android:pathData="M52.4,25 h3.2 v15 h-3.2 z" />
+    <path android:fillColor="#E5D7A8" android:pathData="M47.5,29.5 h13 v3 h-13 z" />
+</vector>
